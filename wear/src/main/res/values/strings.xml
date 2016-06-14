@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sunshine Wearable</string>
+    <string name="hello_round">Hello Round World!</string>
+    <string name="hello_square">Hello Square World!</string>
+    <!-- My customs values -->
+    <string name="go_ubiquitous_name">My Go Ubiquitous!</string>
+</resources>

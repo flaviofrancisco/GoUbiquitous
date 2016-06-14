@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.derhaifisch.wear">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
+    <!-- Required to act as a custom watch face. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <service
+            android:name=".GoUbiquitousWatchFaceService"
+            android:label="@string/go_ubiquitous_name"
+            android:permission="android.permission.BIND_WALLPAPER" >
+
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/ic_launcher" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/ic_launcher" />
+
+            <meta-data
+                android:name="com.google.android.wearable.watchface.companionConfigurationAction"
+                android:value="com.example.android.wearable.watchface.CONFIG_CARD_BOUNDS" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+        <!-- TODO: ADD THE ACTIVITY TO SHOW THE DETAIL TEMPERATURES? -->
+
+    </application>
+
+</manifest>
