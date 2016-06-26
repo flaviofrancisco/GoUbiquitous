@@ -19,6 +19,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,12 +33,31 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link android.database.Cursor} to a {@link android.support.v7.widget.RecyclerView}.
  */
-public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
+public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> implements
+        DataApi.DataListener,
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks {
+
+    private static final String WEATHER_PATH = "/weather";
+    private static final String HIGH = "HIGH";
+    private static final String LOW = "LOW";
+
+    public static final String LOG_TAG = ForecastAdapter.class.getSimpleName();
+
+    private GoogleApiClient mGoogleApiClient;
 
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
@@ -49,6 +70,26 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     final private ForecastAdapterOnClickHandler mClickHandler;
     final private View mEmptyView;
     final private ItemChoiceManager mICM;
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Wearable.DataApi.addListener(mGoogleApiClient, ForecastAdapter.this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onDataChanged(DataEventBuffer dataEventBuffer) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e(LOG_TAG, "Failed to connect to Google Play Services");
+    }
 
     /**
      * Cache of the children views for a forecast list item.
@@ -90,6 +131,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         mEmptyView = emptyView;
         mICM = new ItemChoiceManager(this);
         mICM.setChoiceMode(choiceMode);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
     /*
@@ -124,6 +171,11 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
+
+        if (!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+
         mCursor.moveToPosition(position);
         int weatherId = mCursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
         int defaultImage;
@@ -183,6 +235,23 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         forecastAdapterViewHolder.mLowTempView.setContentDescription(mContext.getString(R.string.a11y_low_temp, lowString));
 
         mICM.onBindViewHolder(forecastAdapterViewHolder, position);
+
+        if(position == 0)
+        {
+            sendWeatherInfo(high, low);
+        }
+    }
+
+    private void sendWeatherInfo(double high, double low) {
+        PutDataMapRequest request = PutDataMapRequest.create(WEATHER_PATH);
+        DataMap dataMap = request.getDataMap();
+        dataMap.putDouble(HIGH, high);
+        dataMap.putDouble(LOW, low);
+
+        PutDataRequest putDataRequest = request.asPutDataRequest();
+        putDataRequest.setUrgent();
+
+        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {

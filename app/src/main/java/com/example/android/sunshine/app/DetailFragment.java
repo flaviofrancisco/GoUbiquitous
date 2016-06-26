@@ -19,6 +19,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -27,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,11 +43,17 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.Wearable;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>
+{
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     static final String DETAIL_URI = "URI";
@@ -125,6 +134,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mWindLabelView = (TextView) rootView.findViewById(R.id.detail_wind_label_textview);
         mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
         mPressureLabelView = (TextView) rootView.findViewById(R.id.detail_pressure_label_textview);
+
         return rootView;
     }
 

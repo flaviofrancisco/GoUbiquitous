@@ -8,29 +8,31 @@
     <!-- Required to act as a custom watch face. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"/>
+
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
-
         <service
             android:name=".GoUbiquitousWatchFaceService"
             android:label="@string/go_ubiquitous_name"
-            android:permission="android.permission.BIND_WALLPAPER" >
-
+            android:permission="android.permission.BIND_WALLPAPER">
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
-
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
                 android:resource="@drawable/ic_launcher" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
                 android:resource="@drawable/ic_launcher" />
-
             <meta-data
                 android:name="com.google.android.wearable.watchface.companionConfigurationAction"
                 android:value="com.example.android.wearable.watchface.CONFIG_CARD_BOUNDS" />
@@ -42,7 +44,11 @@
             </intent-filter>
         </service>
 
-        <!-- TODO: ADD THE ACTIVITY TO SHOW THE DETAIL TEMPERATURES? -->
+<!--        <service android:name=".WearService" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>-->
 
     </application>
 
