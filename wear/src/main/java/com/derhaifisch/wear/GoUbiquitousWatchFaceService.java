@@ -68,17 +68,6 @@ public class GoUbiquitousWatchFaceService extends CanvasWatchFaceService {
 
     private static final String TAG = "GoUbiquitousWatchFace";
 
-    private static final String WEATHER_PATH = "/weather";
-    private static final String HIGH = "HIGH";
-    private static final String LOW = "LOW";
-    private static final String KEY_WEATHER_ID = "weatherId";
-
-    Bitmap mWeatherIcon;
-    String mWeatherHigh;
-    String mWeatherLow;
-
-    private GoogleApiClient mGoogleApiClient;
-
     @Override
     public Engine onCreateEngine() {
         return new GoUbiquitousWatchFaceEngine();
@@ -178,11 +167,12 @@ public class GoUbiquitousWatchFaceService extends CanvasWatchFaceService {
                         }
 
                         if (dataMap.containsKey(KEY_WEATHER_ID)) {
-/*                            int weatherId = dataMap.getInt(KEY_WEATHER_ID);
-                            Drawable b = getResources().getDrawable(Utility.getIconResourceForWeatherCondition(weatherId));
-                            Bitmap icon = ((BitmapDrawable) b).getBitmap();
-                            float scaledWidth = (mTextTempHighPaint.getTextSize() / icon.getHeight()) * icon.getWidth();
-                            mWeatherIcon = Bitmap.createScaledBitmap(icon, (int) scaledWidth, (int) mTextTempHighPaint.getTextSize(), true);*/
+
+                            int weatherId = dataMap.getInt(KEY_WEATHER_ID);
+                            Drawable drawable = getResources().getDrawable(getIconResourceForWeatherCondition(weatherId));
+                            Bitmap icon = ((BitmapDrawable) drawable).getBitmap();
+                            Bitmap weatherPicResized = Bitmap.createScaledBitmap(icon, icon.getWidth(), icon.getHeight(), true);
+                            mWeatherIcon = weatherPicResized;
 
                         } else {
                             Log.d(TAG, "What? no weatherId?");
@@ -192,6 +182,35 @@ public class GoUbiquitousWatchFaceService extends CanvasWatchFaceService {
                     }
                 }
             }
+        }
+
+        public int getIconResourceForWeatherCondition(int weatherId) {
+            // Based on weather code data found at:
+            // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+            if (weatherId >= 200 && weatherId <= 232) {
+                return R.drawable.ic_storm;
+            } else if (weatherId >= 300 && weatherId <= 321) {
+                return R.drawable.ic_light_rain;
+            } else if (weatherId >= 500 && weatherId <= 504) {
+                return R.drawable.ic_rain;
+            } else if (weatherId == 511) {
+                return R.drawable.ic_snow;
+            } else if (weatherId >= 520 && weatherId <= 531) {
+                return R.drawable.ic_rain;
+            } else if (weatherId >= 600 && weatherId <= 622) {
+                return R.drawable.ic_snow;
+            } else if (weatherId >= 701 && weatherId <= 761) {
+                return R.drawable.ic_fog;
+            } else if (weatherId == 761 || weatherId == 781) {
+                return R.drawable.ic_storm;
+            } else if (weatherId == 800) {
+                return R.drawable.ic_clear;
+            } else if (weatherId == 801) {
+                return R.drawable.ic_light_clouds;
+            } else if (weatherId >= 802 && weatherId <= 804) {
+                return R.drawable.ic_cloudy;
+            }
+            return -1;
         }
 
         @Override
@@ -297,10 +316,12 @@ public class GoUbiquitousWatchFaceService extends CanvasWatchFaceService {
         public void onAmbientModeChanged(boolean inAmbientMode){
             super.onAmbientModeChanged(inAmbientMode);
 
+            mTextColorPaint.setColor(Color.parseColor("white"));
+
             if(inAmbientMode){
-                mTextColorPaint.setColor(Color.parseColor("white"));
+
             } else {
-                mTextColorPaint.setColor(Color.parseColor("red"));
+
             }
 
             if(mIsLowBitAmbient){
@@ -401,15 +422,17 @@ public class GoUbiquitousWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void drawWeatherImage(Canvas canvas, Rect bounds) {
-/*
+
             Bitmap weatherPic = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
             int picResize = weatherPic.getWidth() / 2;
             Bitmap weatherPicResized = Bitmap.createScaledBitmap(weatherPic, picResize, picResize, true);
-
             int centerX = (Math.round(bounds.exactCenterX()) - 1) - (picResize/ 2);
 
-            canvas.drawBitmap(weatherPicResized, centerX, 40, null);
-*/
+            if(mWeatherIcon == null){
+                canvas.drawBitmap(weatherPicResized, centerX, 40, null);
+            } else  {
+                canvas.drawBitmap(mWeatherIcon, centerX, 40, null);
+            }
         }
 
         private String getHoursString(){
